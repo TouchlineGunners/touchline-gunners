@@ -269,19 +269,17 @@ function matchesPlayer(input, player) {
 
 // Arsenal kit SVG
 const KitSVG = ({ number, size = 80 }) => (
-  <svg width={size} height={size * 1.1} viewBox="0 0 80 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size * 1.15} viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Left sleeve - white */}
+    <path d="M22 14 C12 12 0 18 0 30 L10 46 C16 42 24 40 30 40 L22 14Z" fill="white"/>
+    {/* Right sleeve - white */}
+    <path d="M78 14 C88 12 100 18 100 30 L90 46 C84 42 76 40 70 40 L78 14Z" fill="white"/>
     {/* Body - red */}
-    <path d="M20 18 L10 28 L10 70 L70 70 L70 28 L60 18 L52 22 L52 70 L28 70 L28 22 Z" fill="#EF0107"/>
-    {/* White sleeves */}
-    <path d="M20 18 L10 28 L10 44 L28 44 L28 22 Z" fill="white"/>
-    <path d="M60 18 L70 28 L70 44 L52 44 L52 22 Z" fill="white"/>
-    {/* Collar */}
-    <path d="M33 18 Q40 14 47 18 L47 24 Q40 20 33 24 Z" fill="#C8A951"/>
-    {/* Shorts */}
-    <rect x="22" y="70" width="16" height="18" rx="2" fill="#111110"/>
-    <rect x="42" y="70" width="16" height="18" rx="2" fill="#111110"/>
+    <path d="M22 14 L20 40 L18 86 L82 86 L80 40 L78 14 C68 8 58 6 50 6 C42 6 32 8 22 14Z" fill="#EF0107"/>
+    {/* Collar V */}
+    <path d="M44 6 L44 18 L50 24 L56 18 L56 6 C54 5 46 5 44 6Z" fill="white"/>
     {/* Number */}
-    <text x="40" y="58" textAnchor="middle" fontFamily="'Bebas Neue', Impact, sans-serif" fontSize="22" fill="white" letterSpacing="1">
+    <text x="50" y="70" textAnchor="middle" fontFamily="'Bebas Neue', Arial Black, sans-serif" fontSize="32" fontWeight="900" fill="white" letterSpacing="1">
       {number}
     </text>
   </svg>
@@ -483,8 +481,6 @@ export default function GunnersXI() {
           <ul style={{ color: "#ccc", fontSize: 13, paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
             <li>Type surnames to guess players who wore this number</li>
             <li>You have <span style={{ color: "#C8A951", fontWeight: 700 }}>2 minutes</span></li>
-            <li>Accents aren't needed — just the surname</li>
-            <li>Names match in any order by default</li>
           </ul>
         </div>
 
