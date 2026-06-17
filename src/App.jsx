@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import logo from './assets/logo.png'
 import Arsenal501 from './games/Arsenal501/index.jsx'
 import WhoWoreIt from './games/whoworeit/index.jsx'
@@ -152,6 +153,7 @@ export default function App() {
         </div>
         <div style={{ marginTop: 48, textAlign: 'center', fontSize: 11, color: '#333', fontFamily: 'Arial, sans-serif', letterSpacing: 1 }}>TOUCHLINE GUNNERS · FOR THE ARSENAL FAITHFUL</div>
       </div>
+      <Analytics />
     </div>
   )
 }
