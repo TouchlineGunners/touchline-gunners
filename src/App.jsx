@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import logo from './assets/logo.png'
 import Arsenal501 from './games/Arsenal501/index.jsx'
-import WhoWoreIt from './games/WhoWoreIt/index.jsx'
+import WhoWoreIt from './games/whoworeit/index.jsx'
 
 const C = {
   red: '#EF0107',
