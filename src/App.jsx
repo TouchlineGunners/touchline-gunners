@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import logo from './assets/logo.png'
 import Arsenal501 from './games/Arsenal501/index.jsx'
+import GunnersXI from './GunnersXI.jsx'
 
 const C = {
   red: '#EF0107',
@@ -29,18 +30,16 @@ const GAMES = [
     title: 'Gunners XI',
     subtitle: 'Daily Lineup Guesser',
     description: 'Guess the Arsenal starting XI from a historic match. A new puzzle every day.',
-    badge: 'COMING SOON',
-    badgeColor: C.gold,
-    component: null,
+    badge: 'LIVE',
+    badgeColor: '#4ADE80',
+    component: GunnersXI,
   },
 ]
 
 export default function App() {
   const [activeGame, setActiveGame] = useState(null)
-
   const game = GAMES.find(g => g.id === activeGame)
 
-  // If a game is active, render it full screen with a back button
   if (game && game.component) {
     const GameComponent = game.component
     return (
@@ -63,7 +62,6 @@ export default function App() {
     )
   }
 
-  // Hub home screen
   return (
     <div style={{
       minHeight: '100vh',
@@ -74,8 +72,6 @@ export default function App() {
       flexDirection: 'column',
       alignItems: 'center',
     }}>
-
-      {/* Header */}
       <div style={{
         width: '100%',
         background: C.red,
@@ -101,68 +97,4 @@ export default function App() {
         </div>
       </div>
 
-      {/* Game grid */}
-      <div style={{ width: '100%', maxWidth: 720, padding: '32px 16px', boxSizing: 'border-box' }}>
-        <div style={{ fontSize: 10, letterSpacing: 4, color: C.grey, textTransform: 'uppercase', fontFamily: 'Arial, sans-serif', marginBottom: 16 }}>
-          Choose a game
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {GAMES.map(g => (
-            <div
-              key={g.id}
-              onClick={() => g.component && setActiveGame(g.id)}
-              style={{
-                background: g.component ? C.mid : C.dark,
-                border: `1px solid ${g.component ? C.border : '#222'}`,
-                borderRadius: 10,
-                padding: '20px 22px',
-                cursor: g.component ? 'pointer' : 'default',
-                opacity: g.component ? 1 : 0.55,
-                transition: 'all 0.15s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
-              }}
-              onMouseEnter={e => { if (g.component) e.currentTarget.style.borderColor = C.gold }}
-              onMouseLeave={e => { if (g.component) e.currentTarget.style.borderColor = C.border }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: 1 }}>{g.title}</div>
-                  <span style={{
-                    fontSize: 8, fontWeight: 700, letterSpacing: 2,
-                    color: g.component ? C.charcoal : C.charcoal,
-                    background: g.badgeColor,
-                    padding: '2px 7px', borderRadius: 3, textTransform: 'uppercase',
-                    fontFamily: 'Arial, sans-serif',
-                  }}>
-                    {g.badge}
-                  </span>
-                </div>
-                <div style={{ fontSize: 11, color: C.gold, letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Arial, sans-serif', marginBottom: 6 }}>
-                  {g.subtitle}
-                </div>
-                <div style={{ fontSize: 13, color: C.grey, fontFamily: 'Arial, sans-serif', lineHeight: 1.6 }}>
-                  {g.description}
-                </div>
-              </div>
-              {g.component && (
-                <div style={{
-                  fontSize: 22, color: C.gold, flexShrink: 0, fontWeight: 900,
-                }}>
-                  →
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 48, textAlign: 'center', fontSize: 11, color: '#333', fontFamily: 'Arial, sans-serif', letterSpacing: 1 }}>
-          TOUCHLINE GUNNERS · FOR THE ARSENAL FAITHFUL
-        </div>
-      </div>
-    </div>
-  )
-}
+      <div
