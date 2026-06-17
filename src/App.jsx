@@ -3,6 +3,7 @@ import logo from './assets/logo.png'
 import Arsenal501 from './games/Arsenal501/index.jsx'
 import WhoWoreIt from './games/whoworeit/index.jsx'
 import GunnersXI from './games/GunnersXI/index.jsx'
+import ArsenalWordle from './games/ArsenalWordle/index.jsx'
 
 const C = {
   red: '#EF0107',
@@ -43,6 +44,15 @@ const GAMES = [
     badge: 'LIVE',
     badgeColor: '#4ADE80',
     component: GunnersXI,
+  },
+  {
+    id: 'arsenalwordle',
+    title: 'Gunners Wordle',
+    subtitle: 'Daily Player Name Puzzle',
+    description: 'Guess the Arsenal player from their surname. Six attempts, four word lengths — how fast can you crack it?',
+    badge: 'LIVE',
+    badgeColor: '#4ADE80',
+    component: ArsenalWordle,
   },
 ]
 
