@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import logo from './assets/logo.png'
 import Arsenal501 from './games/Arsenal501/index.jsx'
-import GunnersXI from './GunnersXI.jsx'
+import WhoWoreIt from './games/WhoWoreIt/index.jsx'
 
 const C = {
   red: '#EF0107',
@@ -26,13 +26,13 @@ const GAMES = [
     component: Arsenal501,
   },
   {
-    id: 'gunnersxi',
-    title: 'Gunners XI',
-    subtitle: 'Daily Lineup Guesser',
-    description: 'Guess the Arsenal starting XI from a historic match. A new puzzle every day.',
+    id: 'whoworeit',
+    title: 'Who Wore It?',
+    subtitle: 'Daily Shirt Number Quiz',
+    description: 'A new Arsenal shirt number every day. How many players can you name who wore it?',
     badge: 'LIVE',
     badgeColor: '#4ADE80',
-    component: GunnersXI,
+    component: WhoWoreIt,
   },
 ]
 
