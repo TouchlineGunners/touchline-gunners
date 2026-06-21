@@ -260,6 +260,26 @@ const SP_MODES = [
   { id: "timed",    label: "Against the Clock",desc: "Reach 0 before time runs out" },
 ];
 const PAR_TARGET = 9; // "par" for 501 in 9 turns (darts standard)
+
+// ── 501 LEADERBOARD STORAGE ────────────────────────────────────────────────────
+const SCORES_KEY_501 = "tg501_scores";
+
+async function load501Scores() {
+  try {
+    const r = await window.storage.get(SCORES_KEY_501, true);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+async function save501Score(entry) {
+  try {
+    const existing = await load501Scores();
+    const updated = [...existing, entry]
+      .sort((a, b) => a.turns - b.turns)
+      .slice(0, 500);
+    await window.storage.set(SCORES_KEY_501, JSON.stringify(updated), true);
+  } catch {}
+}
 const TIMER_SECONDS = 120;
 
 // ─── COLOURS ─────────────────────────────────────────────────────────────────
@@ -306,6 +326,10 @@ export default function Arsenal501() {
   // Timer (single player timed mode)
   const [timeLeft, setTimeLeft]   = useState(TIMER_SECONDS);
   const timerRef                  = useRef(null);
+
+  // Score submission
+  const [scoreNameInput, setScoreNameInput] = useState('');
+  const [scoreSubmitted, setScoreSubmitted] = useState(false);
 
   const inputRef = useRef(null);
   const logRef   = useRef(null);
@@ -498,6 +522,7 @@ export default function Arsenal501() {
     setSpMode("practice"); setScores([501,501]); setTurn(0); setLog([]);
     setUsedNames(new Set()); setFinalState(null); setWinner(null);
     setFeedback(null); setInputVal(""); setDisambig(null); setTurnCount(0);
+    setScoreNameInput(""); setScoreSubmitted(false);
     clearInterval(timerRef.current);
   }
 
@@ -505,6 +530,7 @@ export default function Arsenal501() {
     setScores([501,501]); setTurn(0); setLog([]); setUsedNames(new Set());
     setFinalState(null); setWinner(null); setFeedback(null); setInputVal("");
     setDisambig(null); setTurnCount(0); setTimeLeft(TIMER_SECONDS);
+    setScoreNameInput(""); setScoreSubmitted(false);
     setPhase("playing");
   }
 
@@ -792,7 +818,49 @@ export default function Arsenal501() {
                   {spMode==="par" && <span style={{color: winner.turns<=PAR_TARGET?"#4ADE80":"#FCA5A5"}}> ({winner.turns<=PAR_TARGET?`${PAR_TARGET-winner.turns} under par`:`${winner.turns-PAR_TARGET} over par`})</span>}
                   {spMode==="timed" && <span style={{color:C.goldLight}}> with {fmtTime(timeLeft)} left</span>}
                 </div>
-                <div style={{ marginBottom:24 }}/>
+
+                {/* Leaderboard name entry — exclude timed mode */}
+                {spMode !== "timed" && !scoreSubmitted && (
+                  <div style={{ marginTop:16, background:"rgba(0,0,0,0.3)", borderRadius:8, padding:"12px 14px" }}>
+                    <div style={{ fontSize:11, color:C.grey, fontFamily:"Arial,sans-serif", marginBottom:8 }}>
+                      Add your name to the leaderboard:
+                    </div>
+                    <div style={{ display:"flex", gap:8 }}>
+                      <input
+                        type="text"
+                        value={scoreNameInput}
+                        onChange={e => setScoreNameInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && scoreNameInput.trim()) {
+                            save501Score({ name: scoreNameInput.trim().slice(0,20), turns: winner.turns, date: new Date().toISOString().slice(0,10) });
+                            setScoreSubmitted(true);
+                          }
+                        }}
+                        placeholder="Your name"
+                        maxLength={20}
+                        style={{
+                          flex:1, background:"#1a1a1b", border:`1px solid ${C.border}`,
+                          borderRadius:6, color:C.white, padding:"8px 10px",
+                          fontSize:13, fontFamily:"Arial,sans-serif", outline:"none",
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (!scoreNameInput.trim()) return;
+                          save501Score({ name: scoreNameInput.trim().slice(0,20), turns: winner.turns, date: new Date().toISOString().slice(0,10) });
+                          setScoreSubmitted(true);
+                        }}
+                        style={{ background:C.gold, border:"none", borderRadius:6, color:C.charcoal, fontWeight:900, fontSize:12, padding:"8px 14px", cursor:"pointer", fontFamily:"Arial,sans-serif", whiteSpace:"nowrap" }}
+                      >Submit</button>
+                    </div>
+                    <button onClick={() => setScoreSubmitted(true)} style={{ marginTop:6, background:"transparent", border:"none", color:"#444", fontSize:11, cursor:"pointer", fontFamily:"Arial,sans-serif", padding:0 }}>Skip</button>
+                  </div>
+                )}
+                {spMode !== "timed" && scoreSubmitted && (
+                  <div style={{ color:C.gold, fontSize:13, fontFamily:"Arial,sans-serif", marginTop:10 }}>✓ Score submitted!</div>
+                )}
+
+                <div style={{ marginBottom:16 }}/>
               </>
             )}
 
