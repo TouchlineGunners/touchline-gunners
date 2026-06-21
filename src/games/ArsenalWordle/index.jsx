@@ -1,4 +1,31 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+
+// ─── WORDLE STORAGE ───────────────────────────────────────────────────────────
+const WORDLE_SCORES_KEY = "tgaw_scores";
+
+async function loadWordleScores() {
+  try {
+    const r = await window.storage.get(WORDLE_SCORES_KEY, true);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+async function saveWordleScore(entry) {
+  try {
+    const existing = await loadWordleScores();
+    const today = entry.date;
+    // Keep only today's scores plus all-time structure; dedupe by name+bucket+date (keep best)
+    const others = existing.filter(e => !(e.name === entry.name && e.bucket === entry.bucket && e.date === today));
+    const updated = [...others, entry]
+      .sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        if (a.guesses !== b.guesses) return a.guesses - b.guesses;
+        return a.timeTaken - b.timeTaken;
+      })
+      .slice(0, 500);
+    await window.storage.set(WORDLE_SCORES_KEY, JSON.stringify(updated), true);
+  } catch {}
+}
 
 // ─── PLAYER DATA ─────────────────────────────────────────────────────────────
 // 780 unique Arsenal player surnames scraped from all 3 Wikipedia appearance pages
@@ -50,8 +77,7 @@ function getDailyPlayer(bucket, dateStr) {
 }
 
 function getTodayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return new Date().toISOString().slice(0, 10);
 }
 
 function evaluateGuess(guess, target) {
@@ -290,6 +316,40 @@ function WordleGame({ bucketKey, hintEnabled, onBack }) {
   const [shake,        setShake]        = useState(false);
   const [message,      setMessage]      = useState('');
 
+  // Timer
+  const [elapsed,     setElapsed]      = useState(0);
+  const timerRef                       = useRef(null);
+  const startTimeRef                   = useRef(Date.now());
+
+  // Score submission
+  const [nameInput,   setNameInput]    = useState('');
+  const [submitted,   setSubmitted]    = useState(false);
+
+  // Start timer on mount, stop on game over
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (gameOver) clearInterval(timerRef.current);
+  }, [gameOver]);
+
+  async function handleSubmitWordleScore() {
+    if (!nameInput.trim()) return;
+    await saveWordleScore({
+      name: nameInput.trim().slice(0, 20),
+      guesses: guesses.length,
+      timeTaken: elapsed,
+      bucket: bucketKey,
+      date: today,
+    });
+    setSubmitted(true);
+  }
+
   // Build keyboard colours — priority: correct > present > absent, never downgrade
   const PRIORITY = { correct: 3, present: 2, absent: 1 };
   const usedLetters = {};
@@ -427,6 +487,57 @@ function WordleGame({ bucketKey, hintEnabled, onBack }) {
       {showCard && (
         <div style={{ marginTop: 20, width: '100%', maxWidth: 420, padding: '0 10px' }}>
           <PlayerCard player={target} won={won} guessCount={guesses.length} />
+
+          {/* Timer result */}
+          {won && (
+            <div style={{
+              textAlign: 'center', marginTop: 8, marginBottom: 4,
+              fontSize: 13, color: '#aaa', fontFamily: 'Arial, sans-serif',
+            }}>
+              ⏱ Solved in {guesses.length} {guesses.length === 1 ? 'guess' : 'guesses'} · {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+            </div>
+          )}
+
+          {/* Score submission — wins only */}
+          {won && !submitted && (
+            <div style={{ marginTop: 12, background: '#1a1a1b', border: '1px solid #2a2a2b', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontSize: 12, color: '#aaa', fontFamily: 'Arial, sans-serif', marginBottom: 8 }}>
+                Add your name to the leaderboard:
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSubmitWordleScore(); }}
+                  placeholder="Your name"
+                  maxLength={20}
+                  style={{
+                    flex: 1, background: '#2a2a2b', border: '1px solid #3a3a3c',
+                    borderRadius: 6, color: '#fff', padding: '8px 12px',
+                    fontSize: 14, fontFamily: 'Arial, sans-serif', outline: 'none',
+                  }}
+                />
+                <button onClick={handleSubmitWordleScore} style={{
+                  background: '#ef4444', border: 'none', borderRadius: 6,
+                  color: '#fff', fontWeight: 700, fontSize: 13,
+                  padding: '8px 16px', cursor: 'pointer', fontFamily: 'Arial, sans-serif',
+                  whiteSpace: 'nowrap',
+                }}>Submit</button>
+              </div>
+              <button onClick={() => setSubmitted(true)} style={{
+                marginTop: 8, background: 'transparent', border: 'none',
+                color: '#555', fontSize: 12, cursor: 'pointer',
+                fontFamily: 'Arial, sans-serif', padding: 0,
+              }}>Skip</button>
+            </div>
+          )}
+          {won && submitted && (
+            <div style={{ textAlign: 'center', color: '#C8A951', fontSize: 13, fontFamily: 'Arial, sans-serif', marginTop: 10 }}>
+              ✓ Score submitted!
+            </div>
+          )}
+
           <button onClick={onBack} style={{
             marginTop: 16, width: '100%', background: '#ef4444', border: 'none',
             color: '#fff', fontWeight: 700, fontSize: 15, borderRadius: 8,
